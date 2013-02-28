@@ -42,18 +42,55 @@
     [self presentViewController:navigationController animated:YES completion:NULL];
 }
 
+- (BOOL)saveFile:(NSData *)data toPath:(NSString *)path
+{
+    return [[NSFileManager defaultManager] createFileAtPath:path contents:data attributes:nil];
+}
+
 
 #pragma mark - QBImagePickerControllerDelegate
 
 - (void)imagePickerController:(QBImagePickerController *)imagePickerController didFinishPickingMediaWithInfo:(id)info
 {
     if(imagePickerController.allowsMultipleSelection) {
-        NSArray *mediaInfoArray = (NSArray *)info;
+        NSArray *assets = info;
         
-        NSLog(@"Selected %d photos", mediaInfoArray.count);
+        NSLog(@"Selected %d photos", assets.count);
+        
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
+            
+            NSLog(@"Save photos to disk…");
+            
+            // Path: `Library/Caches/fileName`
+            NSArray *cachesSearchPaths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+            NSString *cachesDirectory = [cachesSearchPaths count] == 0 ? nil : [cachesSearchPaths objectAtIndex:0];
+            NSString *defaultFileName = [[NSDate date] description];
+            
+            NSUInteger count = 0;
+            
+            for (ALAsset *asset in assets) {
+                count ++;
+                UIImage *image = [UIImage imageWithCGImage:[[asset defaultRepresentation] fullScreenImage]];
+                NSData *data = UIImageJPEGRepresentation(image, 1.0f);
+                NSString *fileName = [defaultFileName stringByAppendingFormat:@"%d.jpg", count + 1];
+                NSString *filePath = [cachesDirectory stringByAppendingPathComponent:fileName];
+                
+                // Save it to disk
+                if ([self saveFile:data toPath:filePath]) {
+                    NSLog(@"Saved: %d [Path: %@]", count, filePath);
+                } else {
+                    NSLog(@"Failed: %d", count);
+                }
+            }
+            
+            dispatch_async(dispatch_get_main_queue(), ^(void) {
+                NSLog(@"Main thread, did finish saving.");
+            });
+        });
+        
     } else {
-        NSDictionary *mediaInfo = (NSDictionary *)info;
-        NSLog(@"Selected: %@", mediaInfo);
+        ALAsset *asset = info;
+        NSLog(@"Selected: %@", asset);
     }
     
     [self dismissViewControllerAnimated:YES completion:NULL];
