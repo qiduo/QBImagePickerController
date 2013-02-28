@@ -27,7 +27,6 @@
         
         [self.contentView addSubview:titleLabel];
         self.titleLabel = titleLabel;
-        [titleLabel release];
         
         // Count
         UILabel *countLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
@@ -38,7 +37,6 @@
         
         [self.contentView addSubview:countLabel];
         self.countLabel = countLabel;
-        [countLabel release];
     }
     
     return self;
@@ -78,12 +76,5 @@
     self.countLabel.frame = countLabelFrame;
 }
 
-- (void)dealloc
-{
-    [_titleLabel release];
-    [_countLabel release];
-    
-    [super dealloc];
-}
 
 @end
