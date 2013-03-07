@@ -34,6 +34,21 @@
 
 @implementation QBImagePickerController
 
+#pragma mark - Class Methods
+
+// See: http://www.daveoncode.com/2011/10/15/solve-xcode-error-invalid-attempt-to-access-alassetprivate-past-the-lifetime-of-its-owning-alassetslibrary/
++ (ALAssetsLibrary *)defaultAssetsLibrary
+{
+    static dispatch_once_t pred = 0;
+    static ALAssetsLibrary *library = nil;
+    dispatch_once(&pred, ^{
+        library = [[ALAssetsLibrary alloc] init];
+    });
+    return library;
+}
+
+#pragma mark - UIViewController
+
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -56,9 +71,7 @@
         self.minimumNumberOfSelection = 0;
         self.maximumNumberOfSelection = 0;
         
-        ALAssetsLibrary *assetsLibrary = [[ALAssetsLibrary alloc] init];
-        self.assetsLibrary = assetsLibrary;
-        
+        self.assetsLibrary = [[self class] defaultAssetsLibrary];
         self.assetsGroups = [NSMutableArray array];
         
         // Table View
