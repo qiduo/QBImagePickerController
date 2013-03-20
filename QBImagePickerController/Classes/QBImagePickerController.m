@@ -60,7 +60,7 @@
         [UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeSavedPhotosAlbum];
         
         /* Initialization */
-        self.title = @"Photos";
+        self.title = NSLocalizedString(@"Photos", @"Image picker title");
         self.filterType = QBImagePickerFilterTypeAllPhotos;
         self.showsCancelButton = YES;
         self.fullScreenLayoutEnabled = YES;
