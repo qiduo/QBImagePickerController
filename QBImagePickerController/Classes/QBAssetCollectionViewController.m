@@ -58,6 +58,19 @@
     return self;
 }
 
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    UIButton *button = [[UIButton alloc] initWithFrame:CGRectMake(0.0f, 0.0f, 58.0f, 32.0f)];
+    [button setBackgroundImage:[UIImage imageNamed:@"bg_btn_navbar_white"] forState:UIControlStateNormal];
+    [button setBackgroundImage:[UIImage imageNamed:@"bg_btn_navbar_highlighted"] forState:UIControlStateHighlighted];
+    [button setImage:[UIImage imageNamed:@"icon_back_normal"] forState:UIControlStateNormal];
+    [button setImage:[UIImage imageNamed:@"icon_back_highlighted"] forState:UIControlStateHighlighted];
+    [button addTarget:self action:@selector(back:) forControlEvents:UIControlEventTouchUpInside];
+    UIBarButtonItem *backButton = [[UIBarButtonItem alloc] initWithCustomView:button];
+    [self.navigationItem setLeftBarButtonItem:backButton animated:NO];
+}
+
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
@@ -165,11 +178,15 @@
 {
     if(self.allowsMultipleSelection) {
         // Set done button
-        UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(done)];
-        doneButton.enabled = NO;
-        
-        [self.navigationItem setRightBarButtonItem:doneButton animated:NO];
-        self.doneButton = doneButton;
+        UIButton *button = [[UIButton alloc] initWithFrame:CGRectMake(0.0f, 0.0f, 58.0f, 32.0f)];
+        [button setBackgroundImage:[UIImage imageNamed:@"bg_btn_navbar_white"] forState:UIControlStateNormal];
+        [button setBackgroundImage:[UIImage imageNamed:@"bg_btn_navbar_highlighted"] forState:UIControlStateHighlighted];
+        [button setImage:[UIImage imageNamed:@"btn-checkmark-normal"] forState:UIControlStateNormal];
+        [button setImage:[UIImage imageNamed:@"btn-checkmark-highlighted"] forState:UIControlStateHighlighted];
+        [button addTarget:self action:@selector(done) forControlEvents:UIControlEventTouchUpInside];
+        button.enabled = NO;
+        self.doneButton = [[UIBarButtonItem alloc] initWithCustomView:button];
+        [self.navigationItem setRightBarButtonItem:self.doneButton animated:NO];
     } else if(self.showsCancelButton) {
         // Set cancel button
         UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(cancel)];
@@ -182,10 +199,11 @@
 
 - (void)updateDoneButton
 {
+    UIButton *button = (UIButton *)self.doneButton.customView;
     if(self.limitsMinimumNumberOfSelection) {
-        self.doneButton.enabled = (self.selectedAssets.count >= self.minimumNumberOfSelection);
+        button.enabled = (self.selectedAssets.count >= self.minimumNumberOfSelection);
     } else {
-        self.doneButton.enabled = (self.selectedAssets.count > 0);
+        button.enabled = (self.selectedAssets.count > 0);
     }
 }
 
@@ -197,6 +215,11 @@
 - (void)cancel
 {
     [self.delegate assetCollectionViewControllerDidCancel:self];
+}
+
+- (void)back:(id)sender
+{
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 

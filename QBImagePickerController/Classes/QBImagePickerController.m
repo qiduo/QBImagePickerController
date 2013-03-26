@@ -188,10 +188,16 @@
     _showsCancelButton = showsCancelButton;
     
     if(self.showsCancelButton) {
-        UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(cancel)];
-        [self.navigationItem setRightBarButtonItem:cancelButton animated:NO];
+        UIButton *button = [[UIButton alloc] initWithFrame:CGRectMake(0.0f, 0.0f, 58.0f, 32.0f)];
+        [button setBackgroundImage:[UIImage imageNamed:@"bg_btn_navbar_white"] forState:UIControlStateNormal];
+        [button setBackgroundImage:[UIImage imageNamed:@"bg_btn_navbar_highlighted"] forState:UIControlStateHighlighted];
+        [button setImage:[UIImage imageNamed:@"icon_back_normal"] forState:UIControlStateNormal];
+        [button setImage:[UIImage imageNamed:@"icon_back_highlighted"] forState:UIControlStateHighlighted];
+        [button addTarget:self action:@selector(cancel) forControlEvents:UIControlEventTouchUpInside];
+        UIBarButtonItem *cancelButton = [[UIBarButtonItem alloc] initWithCustomView:button];
+        [self.navigationItem setLeftBarButtonItem:cancelButton animated:NO];
     } else {
-        [self.navigationItem setRightBarButtonItem:nil animated:NO];
+        [self.navigationItem setLeftBarButtonItem:nil animated:NO];
     }
 }
 
