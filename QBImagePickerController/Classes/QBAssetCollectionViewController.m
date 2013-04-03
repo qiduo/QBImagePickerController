@@ -62,10 +62,10 @@
 {
     [super viewDidLoad];
     UIButton *button = [[UIButton alloc] initWithFrame:CGRectMake(0.0f, 0.0f, 58.0f, 32.0f)];
-    [button setBackgroundImage:[UIImage imageNamed:@"bg_btn_navbar_white"] forState:UIControlStateNormal];
-    [button setBackgroundImage:[UIImage imageNamed:@"bg_btn_navbar_highlighted"] forState:UIControlStateHighlighted];
-    [button setImage:[UIImage imageNamed:@"icon_back_normal"] forState:UIControlStateNormal];
-    [button setImage:[UIImage imageNamed:@"icon_back_highlighted"] forState:UIControlStateHighlighted];
+    [button setBackgroundImage:[UIImage imageNamed:@"bg-btn-navbar-normal"] forState:UIControlStateNormal];
+    [button setBackgroundImage:[UIImage imageNamed:@"bg-btn-navbar-highlighted"] forState:UIControlStateHighlighted];
+    [button setImage:[UIImage imageNamed:@"btn-back-arrow-normal"] forState:UIControlStateNormal];
+    [button setImage:[UIImage imageNamed:@"btn-back-arrow-highlighted"] forState:UIControlStateHighlighted];
     [button addTarget:self action:@selector(back:) forControlEvents:UIControlEventTouchUpInside];
     UIBarButtonItem *backButton = [[UIBarButtonItem alloc] initWithCustomView:button];
     [self.navigationItem setLeftBarButtonItem:backButton animated:NO];
@@ -179,8 +179,8 @@
     if(self.allowsMultipleSelection) {
         // Set done button
         UIButton *button = [[UIButton alloc] initWithFrame:CGRectMake(0.0f, 0.0f, 58.0f, 32.0f)];
-        [button setBackgroundImage:[UIImage imageNamed:@"bg_btn_navbar_white"] forState:UIControlStateNormal];
-        [button setBackgroundImage:[UIImage imageNamed:@"bg_btn_navbar_highlighted"] forState:UIControlStateHighlighted];
+        [button setBackgroundImage:[UIImage imageNamed:@"bg-btn-navbar-normal"] forState:UIControlStateNormal];
+        [button setBackgroundImage:[UIImage imageNamed:@"bg-btn-navbar-highlighted"] forState:UIControlStateHighlighted];
         [button setImage:[UIImage imageNamed:@"btn-checkmark-normal"] forState:UIControlStateNormal];
         [button setImage:[UIImage imageNamed:@"btn-checkmark-highlighted"] forState:UIControlStateHighlighted];
         [button addTarget:self action:@selector(done) forControlEvents:UIControlEventTouchUpInside];
