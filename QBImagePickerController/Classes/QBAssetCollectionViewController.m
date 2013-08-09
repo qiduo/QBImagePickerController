@@ -177,8 +177,8 @@
         // Set done button
         UIButton *button = [UIButton qdMailDoneButton];
         [button addTarget:self action:@selector(done) forControlEvents:UIControlEventTouchUpInside];
-        button.enabled = NO;
         self.doneButton = [[UIBarButtonItem alloc] initWithCustomView:button];
+        self.doneButton.enabled = NO;
         [self.navigationItem setRightBarButtonItem:self.doneButton animated:NO];
     } else if(self.showsCancelButton) {
         // Set cancel button
@@ -192,11 +192,10 @@
 
 - (void)updateDoneButton
 {
-    UIButton *button = (UIButton *)self.doneButton.customView;
     if(self.limitsMinimumNumberOfSelection) {
-        button.enabled = (self.selectedAssets.count >= self.minimumNumberOfSelection);
+        self.doneButton.enabled = (self.selectedAssets.count >= self.minimumNumberOfSelection);
     } else {
-        button.enabled = (self.selectedAssets.count > 0);
+        self.doneButton.enabled = (self.selectedAssets.count > 0);
     }
 }
 
