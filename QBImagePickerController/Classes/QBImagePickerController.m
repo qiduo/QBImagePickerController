@@ -13,9 +13,16 @@
 // Views
 #import "QBImagePickerGroupCell.h"
 #import "UIButton+QDMailAdditions.h"
+#import "QDHintTextView.h"
 
 // Controllers
 #import "QBAssetCollectionViewController.h"
+
+#define SYSTEM_VERSION_EQUAL_TO(v)                  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedSame)
+#define SYSTEM_VERSION_GREATER_THAN(v)              ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedDescending)
+#define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
+#define SYSTEM_VERSION_LESS_THAN(v)                 ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
+#define SYSTEM_VERSION_LESS_THAN_OR_EQUAL_TO(v)     ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedDescending)
 
 @interface QBImagePickerController ()
 
@@ -27,6 +34,8 @@
 @property (nonatomic, assign) UIBarStyle previousBarStyle;
 @property (nonatomic, assign) BOOL previousBarTranslucent;
 @property (nonatomic, assign) UIStatusBarStyle previousStatusBarStyle;
+
+@property (nonatomic, strong) QDHintTextView *authorizationHintTextView;
 
 - (void)cancel;
 - (NSDictionary *)mediaInfoFromAsset:(ALAsset *)asset;
@@ -81,7 +90,18 @@
         tableView.delegate = self;
         tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         
+        _authorizationHintTextView = [[QDHintTextView alloc] initWithFrame:CGRectMake(10.f, 200.f, 300.f, self.view.bounds.size.height)];
+        _authorizationHintTextView.font = [UIFont systemFontOfSize:16.f];
+        _authorizationHintTextView.textColor = [UIColor grayColor];
+        _authorizationHintTextView.editable = NO;
+        _authorizationHintTextView.scrollEnabled = NO;
+        _authorizationHintTextView.textAlignment = UITextAlignmentLeft;
+        _authorizationHintTextView.hidden = YES;
+        self.view.backgroundColor = [UIColor whiteColor];
+        
+        
         [self.view addSubview:tableView];
+        [self.view addSubview:_authorizationHintTextView];
         self.tableView = tableView;
     }
     
@@ -112,9 +132,25 @@
             }
         }
     };
+    __block BOOL denied = NO;
     
     void (^assetsGroupsFailureBlock)(NSError *) = ^(NSError *error) {
-        NSLog(@"Error: %@", [error localizedDescription]);
+        if (error.code == ALAssetsLibraryAccessUserDeniedError) {
+            if (!denied) {
+                _authorizationHintTextView.hidden = NO;
+                _tableView.hidden = YES;
+                if (SYSTEM_VERSION_LESS_THAN(@"5.0")) {
+                    _authorizationHintTextView.text = NSLocalizedString(@"Access To Library Hint Version Less Than 5.0", @"");
+                } else if (SYSTEM_VERSION_LESS_THAN(@"6.0")) {
+                    _authorizationHintTextView.text = NSLocalizedString(@"Access To Library Hint Version 5.x", @"");
+                } else if (SYSTEM_VERSION_LESS_THAN(@"7.0")) {
+                    _authorizationHintTextView.text = NSLocalizedString(@"Access To Library Hint Version 6.x", @"");
+                } else {
+                    _authorizationHintTextView.text = NSLocalizedString(@"Access To Library Hint Version 7.x", @"");
+                }
+                denied = YES;
+            }
+        }
     };
     
     // Enumerate Camera Roll
@@ -131,6 +167,11 @@
     
     // Faces
     [self.assetsLibrary enumerateGroupsWithTypes:ALAssetsGroupFaces usingBlock:assetsGroupsEnumerationBlock failureBlock:assetsGroupsFailureBlock];
+    
+    if (!denied) {
+        [_authorizationHintTextView removeFromSuperview];
+        self.view.backgroundColor = [UIColor clearColor];
+    }
 }
 
 - (void)viewWillAppear:(BOOL)animated
