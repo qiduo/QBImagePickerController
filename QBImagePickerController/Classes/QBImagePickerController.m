@@ -18,11 +18,7 @@
 // Controllers
 #import "QBAssetCollectionViewController.h"
 
-#define SYSTEM_VERSION_EQUAL_TO(v)                  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedSame)
-#define SYSTEM_VERSION_GREATER_THAN(v)              ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedDescending)
-#define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
 #define SYSTEM_VERSION_LESS_THAN(v)                 ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
-#define SYSTEM_VERSION_LESS_THAN_OR_EQUAL_TO(v)     ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedDescending)
 
 @interface QBImagePickerController ()
 
@@ -139,14 +135,10 @@
             if (!denied) {
                 _authorizationHintTextView.hidden = NO;
                 _tableView.hidden = YES;
-                if (SYSTEM_VERSION_LESS_THAN(@"5.0")) {
-                    _authorizationHintTextView.text = NSLocalizedString(@"Access To Library Hint Version Less Than 5.0", @"");
-                } else if (SYSTEM_VERSION_LESS_THAN(@"6.0")) {
-                    _authorizationHintTextView.text = NSLocalizedString(@"Access To Library Hint Version 5.x", @"");
-                } else if (SYSTEM_VERSION_LESS_THAN(@"7.0")) {
-                    _authorizationHintTextView.text = NSLocalizedString(@"Access To Library Hint Version 6.x", @"");
+                if (SYSTEM_VERSION_LESS_THAN(@"6.0")) {
+                    _authorizationHintTextView.text = NSLocalizedString(@"Access To Library Hint Version Less Than 6.0", @"");
                 } else {
-                    _authorizationHintTextView.text = NSLocalizedString(@"Access To Library Hint Version 7.x", @"");
+                    _authorizationHintTextView.text = NSLocalizedString(@"Access To Library Hint Version 6.x Or Higher", @"");
                 }
                 denied = YES;
             }
