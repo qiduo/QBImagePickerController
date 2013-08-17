@@ -126,7 +126,6 @@
             }
         }
     };
-    
     __block BOOL denied = NO;
     
     void (^assetsGroupsFailureBlock)(NSError *) = ^(NSError *error) {
