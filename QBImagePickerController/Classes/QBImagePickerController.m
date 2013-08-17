@@ -17,6 +17,8 @@
 // Controllers
 #import "QBAssetCollectionViewController.h"
 
+#define SYSTEM_VERSION_LESS_THAN(v)                 ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
+
 @interface QBImagePickerController ()
 
 @property (nonatomic, strong) ALAssetsLibrary *assetsLibrary;
@@ -27,6 +29,8 @@
 @property (nonatomic, assign) UIBarStyle previousBarStyle;
 @property (nonatomic, assign) BOOL previousBarTranslucent;
 @property (nonatomic, assign) UIStatusBarStyle previousStatusBarStyle;
+
+@property (nonatomic, strong) UILabel *hintLabelView;
 
 - (void)cancel;
 - (NSDictionary *)mediaInfoFromAsset:(ALAsset *)asset;
@@ -81,7 +85,17 @@
         tableView.delegate = self;
         tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         
+        _hintLabelView = [[UILabel alloc] initWithFrame:CGRectMake(10.f, 170.f, 300.f, 100.f)];
+        _hintLabelView.font = [UIFont systemFontOfSize:16.f];
+        _hintLabelView.textColor = [UIColor grayColor];
+        _hintLabelView.textAlignment = UITextAlignmentLeft;
+        _hintLabelView.hidden = YES;
+        _hintLabelView.numberOfLines = 0;
+        _hintLabelView.lineBreakMode = UILineBreakModeWordWrap;
+        self.view.backgroundColor = [UIColor whiteColor];
+        
         [self.view addSubview:tableView];
+        [self.view addSubview:_hintLabelView];
         self.tableView = tableView;
     }
     
@@ -113,8 +127,21 @@
         }
     };
     
+    __block BOOL denied = NO;
+    
     void (^assetsGroupsFailureBlock)(NSError *) = ^(NSError *error) {
-        NSLog(@"Error: %@", [error localizedDescription]);
+        if (error.code == ALAssetsLibraryAccessUserDeniedError) {
+            if (!denied) {
+                _hintLabelView.hidden = NO;
+                _tableView.hidden = YES;
+                if (SYSTEM_VERSION_LESS_THAN(@"6.0")) {
+                    _hintLabelView.text = NSLocalizedString(@"Access To Library Hint Version Less Than 6.0", @"");
+                } else {
+                    _hintLabelView.text = NSLocalizedString(@"Access To Library Hint Version 6.x Or Higher", @"");
+                }
+                denied = YES;
+            }
+        }
     };
     
     // Enumerate Camera Roll
@@ -131,6 +158,11 @@
     
     // Faces
     [self.assetsLibrary enumerateGroupsWithTypes:ALAssetsGroupFaces usingBlock:assetsGroupsEnumerationBlock failureBlock:assetsGroupsFailureBlock];
+    
+    if (!denied) {
+        [_hintLabelView removeFromSuperview];
+        self.view.backgroundColor = [UIColor clearColor];
+    }
 }
 
 - (void)viewWillAppear:(BOOL)animated
