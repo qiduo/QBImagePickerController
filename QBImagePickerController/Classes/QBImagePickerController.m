@@ -30,8 +30,6 @@
 @property (nonatomic, assign) BOOL previousBarTranslucent;
 @property (nonatomic, assign) UIStatusBarStyle previousStatusBarStyle;
 
-@property (nonatomic, strong) UILabel *hintLabelView;
-
 - (void)cancel;
 - (NSDictionary *)mediaInfoFromAsset:(ALAsset *)asset;
 
@@ -79,24 +77,31 @@
         self.assetsLibrary = [[self class] defaultAssetsLibrary];
         self.assetsGroups = [NSMutableArray array];
         
-        // Table View
-        UITableView *tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
-        tableView.dataSource = self;
-        tableView.delegate = self;
-        tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        
-        _hintLabelView = [[UILabel alloc] initWithFrame:CGRectMake(10.f, 170.f, 300.f, 100.f)];
-        _hintLabelView.font = [UIFont systemFontOfSize:16.f];
-        _hintLabelView.textColor = [UIColor grayColor];
-        _hintLabelView.textAlignment = UITextAlignmentLeft;
-        _hintLabelView.hidden = YES;
-        _hintLabelView.numberOfLines = 0;
-        _hintLabelView.lineBreakMode = UILineBreakModeWordWrap;
+        if (ALAssetsLibrary.authorizationStatus == ALAuthorizationStatusDenied) {
+            UILabel *hintLabelView = [[UILabel alloc] initWithFrame:CGRectMake(10.f, 170.f, 300.f, 100.f)];
+            hintLabelView.font = [UIFont systemFontOfSize:16.f];
+            hintLabelView.textColor = [UIColor grayColor];
+            hintLabelView.textAlignment = UITextAlignmentLeft;
+            hintLabelView.hidden = NO;
+            hintLabelView.numberOfLines = 0;
+            hintLabelView.lineBreakMode = UILineBreakModeWordWrap;
+            
+            if (SYSTEM_VERSION_LESS_THAN(@"6.0")) {
+                hintLabelView.text = NSLocalizedString(@"Access To Library Hint Version Less Than 6.0", @"");
+            } else {
+                hintLabelView.text = NSLocalizedString(@"Access To Library Hint Version 6.x Or Higher", @"");
+            }
+            [self.view addSubview:hintLabelView];
+        } else {
+            // Table View
+            UITableView *tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
+            tableView.dataSource = self;
+            tableView.delegate = self;
+            tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+            [self.view addSubview:tableView];
+            self.tableView = tableView;
+        }
         self.view.backgroundColor = [UIColor whiteColor];
-        
-        [self.view addSubview:tableView];
-        [self.view addSubview:_hintLabelView];
-        self.tableView = tableView;
     }
     
     return self;
@@ -126,48 +131,32 @@
             }
         }
     };
-    __block BOOL denied = NO;
     
     void (^assetsGroupsFailureBlock)(NSError *) = ^(NSError *error) {
-        if (error.code == ALAssetsLibraryAccessUserDeniedError) {
-            if (!denied) {
-                _hintLabelView.hidden = NO;
-                _tableView.hidden = YES;
-                if (SYSTEM_VERSION_LESS_THAN(@"6.0")) {
-                    _hintLabelView.text = NSLocalizedString(@"Access To Library Hint Version Less Than 6.0", @"");
-                } else {
-                    _hintLabelView.text = NSLocalizedString(@"Access To Library Hint Version 6.x Or Higher", @"");
-                }
-                denied = YES;
-            }
-        }
+        // error handling
     };
     
-    // Enumerate Camera Roll
-    [self.assetsLibrary enumerateGroupsWithTypes:ALAssetsGroupSavedPhotos usingBlock:assetsGroupsEnumerationBlock failureBlock:assetsGroupsFailureBlock];
-    
-    // Photo Stream
-    [self.assetsLibrary enumerateGroupsWithTypes:ALAssetsGroupPhotoStream usingBlock:assetsGroupsEnumerationBlock failureBlock:assetsGroupsFailureBlock];
-    
-    // Album
-    [self.assetsLibrary enumerateGroupsWithTypes:ALAssetsGroupAlbum usingBlock:assetsGroupsEnumerationBlock failureBlock:assetsGroupsFailureBlock];
-    
-    // Event
-    [self.assetsLibrary enumerateGroupsWithTypes:ALAssetsGroupEvent usingBlock:assetsGroupsEnumerationBlock failureBlock:assetsGroupsFailureBlock];
-    
-    // Faces
-    [self.assetsLibrary enumerateGroupsWithTypes:ALAssetsGroupFaces usingBlock:assetsGroupsEnumerationBlock failureBlock:assetsGroupsFailureBlock];
-    
-    if (!denied) {
-        [_hintLabelView removeFromSuperview];
-        self.view.backgroundColor = [UIColor clearColor];
+    if ([ALAssetsLibrary authorizationStatus] != ALAuthorizationStatusDenied) {
+        // Enumerate Camera Roll
+        [self.assetsLibrary enumerateGroupsWithTypes:ALAssetsGroupSavedPhotos usingBlock:assetsGroupsEnumerationBlock failureBlock:assetsGroupsFailureBlock];
+        
+        // Photo Stream
+        [self.assetsLibrary enumerateGroupsWithTypes:ALAssetsGroupPhotoStream usingBlock:assetsGroupsEnumerationBlock failureBlock:assetsGroupsFailureBlock];
+        
+        // Album
+        [self.assetsLibrary enumerateGroupsWithTypes:ALAssetsGroupAlbum usingBlock:assetsGroupsEnumerationBlock failureBlock:assetsGroupsFailureBlock];
+        
+        // Event
+        [self.assetsLibrary enumerateGroupsWithTypes:ALAssetsGroupEvent usingBlock:assetsGroupsEnumerationBlock failureBlock:assetsGroupsFailureBlock];
+        
+        // Faces
+        [self.assetsLibrary enumerateGroupsWithTypes:ALAssetsGroupFaces usingBlock:assetsGroupsEnumerationBlock failureBlock:assetsGroupsFailureBlock];
     }
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    
     // Full screen layout
     if(self.fullScreenLayoutEnabled) {
         NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
@@ -193,6 +182,7 @@
     
     // Cancel table view selection
     [self.tableView deselectRowAtIndexPath:[self.tableView indexPathForSelectedRow] animated:YES];
+    
 }
 
 - (void)viewDidAppear:(BOOL)animated
