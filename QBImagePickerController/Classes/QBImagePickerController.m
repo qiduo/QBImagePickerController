@@ -13,6 +13,7 @@
 // Views
 #import "QBImagePickerGroupCell.h"
 #import "UIButton+QDMailAdditions.h"
+#import "QDRuntimeUtility.h"
 
 // Controllers
 #import "QBAssetCollectionViewController.h"
@@ -173,21 +174,28 @@
         NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
         
         if(indexPath == nil) {
-            self.previousBarStyle = self.navigationController.navigationBar.barStyle;
-            self.previousBarTranslucent = self.navigationController.navigationBar.translucent;
-            self.previousStatusBarStyle = [[UIApplication sharedApplication] statusBarStyle];
+            if ([QDRuntimeUtility isOS7WithSDK7]) {
+                self.edgesForExtendedLayout = UIRectEdgeAll;
+                self.automaticallyAdjustsScrollViewInsets = YES;
+                self.extendedLayoutIncludesOpaqueBars = YES;
+            } else {
+                self.previousBarStyle = self.navigationController.navigationBar.barStyle;
+                self.previousBarTranslucent = self.navigationController.navigationBar.translucent;
+                self.previousStatusBarStyle = [[UIApplication sharedApplication] statusBarStyle];
+                
+                self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
+                [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:YES];
+                
+                CGFloat top = 0;
+                if(![[UIApplication sharedApplication] isStatusBarHidden]) top = top + 20;
+                if(!self.navigationController.navigationBarHidden) top = top + 44;
+                self.tableView.contentInset = UIEdgeInsetsMake(top, 0, 0, 0);
+                self.tableView.scrollIndicatorInsets = UIEdgeInsetsMake(top, 0, 0, 0);
+                
+                [self setWantsFullScreenLayout:YES];
+            }
             
-            self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
             self.navigationController.navigationBar.translucent = YES;
-            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:YES];
-            
-            CGFloat top = 0;
-            if(![[UIApplication sharedApplication] isStatusBarHidden]) top = top + 20;
-            if(!self.navigationController.navigationBarHidden) top = top + 44;
-            self.tableView.contentInset = UIEdgeInsetsMake(top, 0, 0, 0);
-            self.tableView.scrollIndicatorInsets = UIEdgeInsetsMake(top, 0, 0, 0);
-            
-            [self setWantsFullScreenLayout:YES];
         }
     }
     
@@ -208,10 +216,14 @@
     [super viewWillDisappear:animated];
     
     if(self.fullScreenLayoutEnabled) {
-        // Restore bar styles
-        self.navigationController.navigationBar.barStyle = self.previousBarStyle;
         self.navigationController.navigationBar.translucent = self.previousBarTranslucent;
-        [[UIApplication sharedApplication] setStatusBarStyle:self.previousStatusBarStyle animated:YES];
+        if ([QDRuntimeUtility isOS7WithSDK7]) {
+            // nothing to do
+        } else {
+            // Restore bar styles
+            self.navigationController.navigationBar.barStyle = self.previousBarStyle;
+            [[UIApplication sharedApplication] setStatusBarStyle:self.previousStatusBarStyle animated:YES];
+        }
     }
 }
 

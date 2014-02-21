@@ -14,6 +14,7 @@
 #import "QBImagePickerAssetCell.h"
 #import "QBImagePickerFooterView.h"
 #import "UIButton+QDMailAdditions.h"
+#import "QDRuntimeUtility.h"
 
 @interface QBAssetCollectionViewController ()
 
@@ -76,19 +77,26 @@
     [self reloadData];
     
     if(self.fullScreenLayoutEnabled) {
-        // Set bar styles
-        self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
-        self.navigationController.navigationBar.translucent = YES;
-        [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:NO];
-        
-        CGFloat top = 0;
-        if(![[UIApplication sharedApplication] isStatusBarHidden]) top = top + 20;
-        if(!self.navigationController.navigationBarHidden) top = top + 44;
-        self.tableView.contentInset = UIEdgeInsetsMake(top, 0, 0, 0);
-        self.tableView.scrollIndicatorInsets = UIEdgeInsetsMake(top, 0, 0, 0);
-        
-        [self setWantsFullScreenLayout:YES];
+        if ([QDRuntimeUtility isOS7WithSDK7]) {
+            self.edgesForExtendedLayout = UIRectEdgeAll;
+            self.automaticallyAdjustsScrollViewInsets = YES;
+            self.extendedLayoutIncludesOpaqueBars = YES;
+        } else {
+            // Set bar styles
+            self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
+            [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackOpaque animated:NO];
+            
+            CGFloat top = 0;
+            if(![[UIApplication sharedApplication] isStatusBarHidden]) top = top + 20;
+            if(!self.navigationController.navigationBarHidden) top = top + 44;
+            self.tableView.contentInset = UIEdgeInsetsMake(top, 0, 0, 0);
+            self.tableView.scrollIndicatorInsets = UIEdgeInsetsMake(top, 0, 0, 0);
+            
+            [self setWantsFullScreenLayout:YES];
+        }
     }
+    
+    self.navigationController.navigationBar.translucent = YES;
     
     // Scroll to bottom
     NSInteger numberOfRows = [self.tableView numberOfRowsInSection:2];
