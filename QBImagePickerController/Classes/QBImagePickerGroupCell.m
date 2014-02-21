@@ -9,6 +9,7 @@
  */
 
 #import "QBImagePickerGroupCell.h"
+#import "QDRuntimeUtility.h"
 
 @implementation QBImagePickerGroupCell
 
@@ -70,14 +71,21 @@
     CGSize titleTextSize = [self.titleLabel.text sizeWithFont:self.titleLabel.font forWidth:width lineBreakMode:NSLineBreakByTruncatingTail];
     CGSize countTextSize = [self.countLabel.text sizeWithFont:self.countLabel.font forWidth:width lineBreakMode:NSLineBreakByTruncatingTail];
     
+    CGFloat textLabelOriginLeft;
+    if ([QDRuntimeUtility isOS7WithSDK7]) {
+        textLabelOriginLeft = imageViewSize + 33.f;
+    } else {
+        textLabelOriginLeft = imageViewSize + 10.f;
+    }
+    
     CGRect titleLabelFrame;
     CGRect countLabelFrame;
     
     if((titleTextSize.width + countTextSize.width + 10) > width) {
-        titleLabelFrame = CGRectMake(imageViewSize + 10, 0, width - countTextSize.width - 10, imageViewSize);
+        titleLabelFrame = CGRectMake(textLabelOriginLeft, 0, width - countTextSize.width - 10, imageViewSize);
         countLabelFrame = CGRectMake(titleLabelFrame.origin.x + titleLabelFrame.size.width + 10, 0, countTextSize.width, imageViewSize);
     } else {
-        titleLabelFrame = CGRectMake(imageViewSize + 10, 0, titleTextSize.width, imageViewSize);
+        titleLabelFrame = CGRectMake(textLabelOriginLeft, 0, titleTextSize.width, imageViewSize);
         countLabelFrame = CGRectMake(titleLabelFrame.origin.x + titleLabelFrame.size.width + 10, 0, countTextSize.width, imageViewSize);
     }
     
