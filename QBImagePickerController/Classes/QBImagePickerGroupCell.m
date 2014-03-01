@@ -10,6 +10,7 @@
 
 #import "QBImagePickerGroupCell.h"
 #import "QDRuntimeUtility.h"
+#import "QBGroupCellBackgroundView.h"
 
 @implementation QBImagePickerGroupCell
 
@@ -55,9 +56,7 @@
 
 - (void)_setupSelectedStyle
 {
-    UIView *lightBlueView = [[UIView alloc] init];
-    lightBlueView.backgroundColor = [UIColor colorWithRed:72.f/255.f green:169.f/255.f blue:236.f/255.f alpha:1.f];
-    self.selectedBackgroundView = lightBlueView;
+    self.selectedBackgroundView = [[QBGroupCellBackgroundView alloc] initWithFrame:CGRectZero];
 }
 
 - (void)layoutSubviews
