@@ -98,10 +98,12 @@
     
     self.navigationController.navigationBar.translucent = YES;
     
-    // Scroll to bottom
-    NSInteger numberOfRows = [self.tableView numberOfRowsInSection:2];
-    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:(numberOfRows - 1) inSection:2];
-    [self.tableView scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionTop animated:NO];
+    // Scroll to bottom   
+    CGFloat yOffset = self.tableView.contentSize.height - self.tableView.bounds.size.height;
+    if ([QDRuntimeUtility isOS7WithSDK7]) {
+        yOffset += 64.f;
+    }
+    [self.tableView setContentOffset:CGPointMake(0.f, yOffset) animated:NO];
 }
 
 - (void)viewDidAppear:(BOOL)animated
