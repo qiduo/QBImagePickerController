@@ -98,12 +98,15 @@
     
     self.navigationController.navigationBar.translucent = YES;
     
-    // Scroll to bottom   
+    // May need to scroll to bottom
     CGFloat yOffset = self.tableView.contentSize.height - self.tableView.bounds.size.height;
     if ([QDRuntimeUtility isOS7WithSDK7]) {
         yOffset += 64.f;
     }
-    [self.tableView setContentOffset:CGPointMake(0.f, yOffset) animated:NO];
+    // Detect whether content need to be scroll
+    if (yOffset > 0) {
+        [self.tableView setContentOffset:CGPointMake(0.f, yOffset) animated:NO];
+    }
 }
 
 - (void)viewDidAppear:(BOOL)animated
