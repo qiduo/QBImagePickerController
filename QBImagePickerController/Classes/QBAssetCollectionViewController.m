@@ -34,6 +34,11 @@
 
 @implementation QBAssetCollectionViewController
 
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -55,6 +60,8 @@
         
         [self.view addSubview:tableView];
         self.tableView = tableView;
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(assetsLibraryDidChange:) name:ALAssetsLibraryChangedNotification object:nil];
     }
     
     return self;
@@ -132,12 +139,21 @@
 }
 
 
-
 #pragma mark - Instance Methods
+
+- (void)assetsLibraryDidChange:(NSNotification *)notification
+{
+    // The notification will be sent from arbitrary thread, so make sure we update data on main thread.
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+        [self reloadData];
+    });
+}
 
 - (void)reloadData
 {
     // Reload assets
+    [self.assets removeAllObjects];
+    
     [self.assetsGroup enumerateAssetsUsingBlock:^(ALAsset *result, NSUInteger index, BOOL *stop) {
         if(result) {
             [self.assets addObject:result];
